@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="container">
+    <h2>翻譯面板</h2>
+    <div class="settings-bar">
+      <select id="engine-select">
+        <option value="google">Google 翻譯</option>
+        <option value="gemini">Gemini</option>
+      </select>
+      <a href="options.html" target="_blank" class="options-link">設定</a>
+    </div>
+    <textarea id="source-text" rows="8" placeholder="請在此輸入或貼上要翻譯的文字..."></textarea>
+    <button id="translate-button">翻譯</button>
+    <button id="clear-button">清空</button>
+    <h3>翻譯結果:</h3>
+    <div id="result-container">
+      <div class="spinner"></div>
+      <div id="result-text"></div>
+    </div>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
