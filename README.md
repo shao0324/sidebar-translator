@@ -1,7 +1,9 @@
-![Static Badge](https://img.shields.io/badge/https%3A%2F%2Fimg.shields.io%2Fbadge%2Fany_text-extension-blue?logoColor=orange&label=Chrome&labelColor=orange&color=grey)
+# Readme
+
+![Static Badge](https://img.shields.io/badge/https%3A%2F%2Fimg.shields.io%2Fbadge%2Fany_text-extension-blue?logoColor=grey&label=Chrome&labelColor=grey&color=orange)
 ![Static Badge](https://img.shields.io/badge/https%3A%2F%2Fimg.shields.io%2Fbadge%2Fany_text-1.0-blue?label=vesrion)
 
-# Features
+## Features
 
 * 開啟可以將文字翻譯成中文的側邊欄。
 * 可以選擇使用「Google 翻譯」和「Gemini」翻譯。
