@@ -90,7 +90,7 @@ async function translateWithGoogle(text) {
 // 使用 Gemini API 翻譯
 async function translateWithGemini(text, apiKey) {
   // API 端點 URL
-  const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const response = await fetch(apiEndpoint, {
     method: 'POST',
