@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "側邊欄翻譯 (Sidebar Translator)",
-  "version": "1.0",
+  "version": "1.01",
   "description": "在側邊欄開啟翻譯面板，可以選取文字進行翻譯。",
   "permissions": [
     "sidePanel",
