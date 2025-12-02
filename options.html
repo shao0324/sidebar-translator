@@ -25,7 +25,7 @@
       display: block;
       margin-bottom: 8px;
     }
-    input[type="text"], input[type="password"] {
+    input[type="text"], input[type="password"], select {
       width: 100%;
       padding: 10px;
       box-sizing: border-box;
@@ -54,6 +54,14 @@
     <h1>翻譯設定</h1>
     <label for="api-key">Gemini API Key:</label>
     <input type="password" id="api-key" placeholder="請在此貼上您的 Gemini API Key">
+
+    <label for="target-lang">目標語言:</label>
+    <select id="target-lang">
+      <option value="en">英文 (English)</option>
+      <option value="zh-TW" selected>繁體中文 (Traditional Chinese)</option>
+      <option value="ja">日文 (Japanese)</option>
+      <option value="ko">韓文 (Korean)</option>
+    </select>
     <button id="save-button">儲存</button>
     <div id="status"></div>
   </div>

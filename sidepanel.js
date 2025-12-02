@@ -17,6 +17,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// 頁面載入時，讀取並顯示已儲存的設定
+document.addEventListener('DOMContentLoaded', async () => {
+  const data = await chrome.storage.sync.get('engine');
+  if (data.engine) {
+    engineSelect.value = data.engine;
+  }
+});
+
+// 監聽翻譯引擎選擇器的變化，並儲存設定
+engineSelect.addEventListener('change', () => {
+  const engine = engineSelect.value;
+  chrome.storage.sync.set({ engine: engine });
+});
+
 // 清空按鈕點擊事件
 clearButton.addEventListener('click', () => {
   sourceText.value = '';
@@ -31,6 +45,10 @@ translateButton.addEventListener('click', async () => {
     return;
   }
 
+  // 從儲存中讀取設定
+  const { targetLang = 'zh-TW', apiKey } = await chrome.storage.sync.get(['targetLang', 'apiKey']);
+  // 如果儲存中沒有 targetLang，預設為 'zh-TW'
+
   const engine = engineSelect.value;
   
   // 每次開始新的翻譯前先清除先前的結果，避免不斷疊加
@@ -41,13 +59,12 @@ translateButton.addEventListener('click', async () => {
   try {
     let translation = '';
     if (engine === 'google') {
-      translation = await translateWithGoogle(text);
+      translation = await translateWithGoogle(text, targetLang);
     } else if (engine === 'gemini') {
-      const { apiKey } = await chrome.storage.sync.get('apiKey');
       if (!apiKey) {
-        throw new Error('尚未設定 Gemini API Key。請點擊右上角的「設定」進行配置。');
+        throw new Error('尚未設定 Gemini API Key。請點擊「設定」進行配置。');
       }
-      translation = await translateWithGemini(text, apiKey);
+      translation = await translateWithGemini(text, apiKey, targetLang);
     }
     
     // 建立新結果元素，並顯示為唯一的翻譯結果（覆蓋先前內容）
@@ -68,9 +85,16 @@ translateButton.addEventListener('click', async () => {
   }
 });
 
+// 定義語言代碼到完整語言名稱的映射，用於 Gemini 提示
+const languageMap = {
+  'en': 'English',
+  'zh-TW': 'Traditional Chinese',
+  'ja': 'Japanese',
+  'ko': 'Korean'
+};
+
 // 使用 Google 翻譯 (非官方 API，僅供示範)
-async function translateWithGoogle(text) {
-  const targetLang = 'zh-TW'; // 目標語言：繁體中文
+async function translateWithGoogle(text, targetLang) {
   const url = new URL('https://translate.googleapis.com/translate_a/single');
   url.searchParams.append('client', 'gtx');
   url.searchParams.append('sl', 'auto'); // 自動偵測來源語言
@@ -87,10 +111,12 @@ async function translateWithGoogle(text) {
   return data[0].map(item => item[0]).join('');
 }
 
-// 使用 Gemini API 翻譯
-async function translateWithGemini(text, apiKey) {
+// 使用 Gemini API 翻譯 (新增 targetLang 參數)
+async function translateWithGemini(text, apiKey, targetLang) {
   // API 端點 URL
   const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  const targetLangName = languageMap[targetLang] || targetLang; // 取得完整語言名稱，如果沒有則使用代碼
 
   const response = await fetch(apiEndpoint, {
     method: 'POST',
@@ -100,8 +126,7 @@ async function translateWithGemini(text, apiKey) {
     body: JSON.stringify({
       "contents": [{
         "parts": [{
-          // 【修正處】移除 text 變數後多餘的雙引號
-          "text": `Translate the following text to Traditional Chinese (繁體中文). Do not add any extra explanations or translations of the original text, just provide the translated result.\n\nOriginal text: "${text}"`
+          "text": `Translate the following text to ${targetLangName} (${targetLang}). Do not add any extra explanations or translations of the original text, just provide the translated result.\n\nOriginal text: "${text}"`
         }]
       }],
       // generationConfig 和 safetySettings 的設定是正確且良好的實踐
