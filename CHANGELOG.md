@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-01-30
+
+### Added
+- **MyMemory Engine:** Integrated MyMemory as a new translation engine option. It provides free translation without requiring an API key (up to a daily limit).
+
 ## [1.3.0] - 2026-01-30
 
 ### Added

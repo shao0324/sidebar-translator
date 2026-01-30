@@ -115,6 +115,8 @@ translateButton.addEventListener('click', async () => {
     } else if (engine === 'gemini') {
       if (!apiKey) throw new Error('尚未設定 Gemini API Key。');
       translation = await translateWithGemini(text, apiKey, targetLangCode);
+    } else if (engine === 'mymemory') {
+      translation = await translateWithMyMemory(text, targetLangCode);
     }
     
     const newResult = document.createElement('div');
@@ -165,4 +167,33 @@ async function translateWithGemini(text, apiKey, targetLangCode) {
     return data.candidates[0].content.parts[0].text.trim();
   }
   throw new Error('無法提取結果');
+}
+
+async function translateWithMyMemory(text, targetLangCode) {
+  // MyMemory API: https://mymemory.translated.net/doc/spec.php
+  // Free usage limit: 5000 chars/day without email/key.
+  // langpair: 'source|target' (e.g., 'en|it'). Use 'Autodetect|target' for auto-detection.
+  
+  const url = new URL('https://api.mymemory.translated.net/get');
+  url.searchParams.append('q', text);
+  url.searchParams.append('langpair', `Autodetect|${targetLangCode}`);
+
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    // MyMemory returns 403 or other codes when limit reached or error
+    throw new Error(`MyMemory 請求失敗 (${response.status})`);
+  }
+  
+  const data = await response.json();
+  
+  if (data.responseStatus !== 200) {
+    // MyMemory puts error details in responseDetails even if HTTP status is 200 sometimes, 
+    // or if responseStatus is not 200.
+    // However, usually HTTP 200 comes with data. 
+    // If responseStatus is 403 (limit exceeded), it might still be a JSON body.
+    throw new Error(data.responseDetails || 'MyMemory 翻譯錯誤');
+  }
+
+  return data.responseData.translatedText;
 }
