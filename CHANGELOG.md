@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-01-30
+
+### Added
+- **Preferred Languages:** New configuration in the options page to select commonly used target languages.
+- **Language Search:** Search functionality in the options page to easily find languages from a full list.
+- **Dynamic Language Selector:** A new dropdown in the side panel for quick target language switching, prioritized by your preferred selections.
+
+### Changed
+- **Options UI:** The default target language dropdown now dynamically links to the preferred language list for a cleaner interface.
+- **UI Styling:** Beautified the side panel dropdown menus with modern styling and consistent design.
+- **Language List:** Integrated a comprehensive `languages.js` shared resource.
+
 ## [1.2.0] - 2025-12-02
 
 ### Added

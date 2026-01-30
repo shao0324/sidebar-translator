@@ -55,16 +55,30 @@
     <label for="api-key">Gemini API Key:</label>
     <input type="password" id="api-key" placeholder="請在此貼上您的 Gemini API Key">
 
-    <label for="target-lang">目標語言:</label>
+    <label for="target-lang">預設目標語言:</label>
     <select id="target-lang">
       <option value="en">英文 (English)</option>
       <option value="zh-TW" selected>繁體中文 (Traditional Chinese)</option>
       <option value="ja">日文 (Japanese)</option>
       <option value="ko">韓文 (Korean)</option>
     </select>
+
+    <div style="margin-bottom: 15px;">
+      <label>常用語言設定:</label>
+      <button id="toggle-preferred-langs" style="background-color: #6c757d; margin-top: 5px;">設定常用語言</button>
+      
+      <div id="preferred-langs-wrapper" style="display: none; margin-top: 10px; border: 1px solid #ddd; padding: 10px; border-radius: 6px; background-color: #f9f9f9;">
+        <input type="text" id="lang-search" placeholder="搜尋語言..." style="margin-bottom: 10px;">
+        <div id="preferred-langs-list" style="max-height: 250px; overflow-y: auto;">
+          <!-- Checkboxes will be populated here -->
+        </div>
+      </div>
+    </div>
+
     <button id="save-button">儲存</button>
     <div id="status"></div>
   </div>
+  <script src="languages.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

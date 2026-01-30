@@ -12,6 +12,9 @@
         <option value="google">Google 翻譯</option>
         <option value="gemini">Gemini</option>
       </select>
+      <select id="target-lang-select" title="選擇目標語言">
+        <!-- Populated by sidepanel.js -->
+      </select>
       <a href="options.html" target="_blank" class="options-link">設定</a>
     </div>
     <textarea id="source-text" rows="8" placeholder="請在此輸入或貼上要翻譯的文字..."></textarea>
@@ -23,6 +26,7 @@
       <div id="result-text"></div>
     </div>
   </div>
+  <script src="languages.js"></script>
   <script src="sidepanel.js"></script>
 </body>
 </html>

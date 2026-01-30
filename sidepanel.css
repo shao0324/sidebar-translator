@@ -32,12 +32,27 @@ h3 {
   align-items: center;
 }
 
-#engine-select {
-  padding: 8px;
+#engine-select, #target-lang-select {
+  padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #ced4da;
   background-color: #fff;
-  font-size: 14px;
+  font-size: 13px;
+  color: #495057;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#engine-select:focus, #target-lang-select:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+#target-lang-select {
+  flex: 1;
+  margin: 0 8px;
+  max-width: 140px;
 }
 
 .options-link {
