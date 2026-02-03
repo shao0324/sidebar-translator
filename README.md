@@ -18,6 +18,8 @@
     * 網頁右鍵選單：選取文字後透過右鍵「使用側邊欄翻譯」自動開啟並翻譯。
     * 選取即翻譯：側邊欄開啟時，在網頁選取新文字會自動觸發翻譯。
 
+![example](https://github.com/user-attachments/assets/59b8c28c-2ece-4733-8d0b-7c79fd85cf95)
+
 # 匯入
 
 在 Chrome 的 chrome://extensions/ 開啟「開發者模式」，點選「載入已解壓的擴充功能（Load unpacked）」，然後選擇本專案資料夾（`sidebar-translator`）即可。
