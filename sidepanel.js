@@ -5,6 +5,8 @@ const resultText = document.getElementById('result-text');
 const engineSelect = document.getElementById('engine-select');
 const targetLangSelect = document.getElementById('target-lang-select');
 const clearButton = document.getElementById('clear-button');
+const detectedLangContainer = document.getElementById('detected-language-container');
+const detectedLangText = document.getElementById('detected-language-text');
 
 // 預設常用語言
 const DEFAULT_PREFERRED_LANGS = ['zh-TW', 'en', 'ja', 'ko'];
@@ -19,6 +21,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
 });
+
+// 輔助函式：根據代碼獲取語言名稱
+function getLanguageName(code) {
+  const lang = ALL_LANGUAGES.find(l => l.code === code);
+  return lang ? lang.label : code;
+}
 
 // 填充語言下拉選單
 function populateLanguageSelect(preferredCodes, currentSelection) {
@@ -94,6 +102,7 @@ targetLangSelect.addEventListener('change', () => {
 clearButton.addEventListener('click', () => {
   sourceText.value = '';
   resultText.innerHTML = '';
+  detectedLangContainer.style.display = 'none';
 });
 
 // 翻譯
@@ -107,22 +116,38 @@ translateButton.addEventListener('click', async () => {
 
   resultText.innerHTML = '';
   resultContainer.classList.add('loading');
+  detectedLangContainer.style.display = 'none';
 
   try {
     let translation = '';
+    let detectedLangCode = '';
+
     if (engine === 'google') {
-      translation = await translateWithGoogle(text, targetLangCode);
+      const result = await translateWithGoogle(text, targetLangCode);
+      translation = result.translation;
+      detectedLangCode = result.detectedLangCode;
     } else if (engine === 'gemini') {
       if (!apiKey) throw new Error('尚未設定 Gemini API Key。');
-      translation = await translateWithGemini(text, apiKey, targetLangCode);
+      const result = await translateWithGemini(text, apiKey, targetLangCode);
+      translation = result.translation;
+      detectedLangCode = result.detectedLangCode;
     } else if (engine === 'mymemory') {
-      translation = await translateWithMyMemory(text, targetLangCode);
+      const result = await translateWithMyMemory(text, targetLangCode);
+      translation = result.translation;
+      detectedLangCode = result.detectedLangCode;
     }
     
+    // 顯示翻譯結果
     const newResult = document.createElement('div');
     newResult.className = 'translation-item';
     newResult.textContent = translation;
     resultText.appendChild(newResult);
+
+    // 顯示偵測到的語言
+    if (detectedLangCode) {
+      detectedLangText.textContent = getLanguageName(detectedLangCode);
+      detectedLangContainer.style.display = 'block';
+    }
   } catch (error) {
     const errorResult = document.createElement('div');
     errorResult.className = 'translation-item error';
@@ -144,7 +169,11 @@ async function translateWithGoogle(text, targetLang) {
   const response = await fetch(url);
   if (!response.ok) throw new Error('Google 請求失敗');
   const data = await response.json();
-  return data[0].map(item => item[0]).join('');
+  
+  const translation = data[0].map(item => item[0]).join('');
+  const detectedLangCode = data[2];
+
+  return { translation, detectedLangCode };
 }
 
 async function translateWithGemini(text, apiKey, targetLangCode) {
@@ -152,48 +181,60 @@ async function translateWithGemini(text, apiKey, targetLangCode) {
   const langObj = ALL_LANGUAGES.find(l => l.code === targetLangCode);
   const targetLangName = langObj ? langObj.name : targetLangCode;
 
+  const prompt = `Translate the following text to ${targetLangName} (${targetLangCode}).
+Provide the result as a JSON object with two fields: "translation" (the translated text) and "detectedLangCode" (the ISO-639-1 language code of the original text).
+Do not include any other text or markdown formatting in your response.
+
+Text: "${text}"`;
+
   const response = await fetch(apiEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      "contents": [{ "parts": [{ "text": `Translate the following text to ${targetLangName} (${targetLangCode}). Provide only the translation.\n\nText: "${text}"` }] }],
-      "generationConfig": { "temperature": 0.5 }
+      "contents": [{ "parts": [{ "text": prompt }] }],
+      "generationConfig": { 
+        "temperature": 0.2,
+        "response_mime_type": "application/json"
+      }
     })
   });
 
   if (!response.ok) throw new Error(`Gemini 請求失敗 (${response.status})`);
   const data = await response.json();
+  
   if (data.candidates && data.candidates[0].content.parts[0].text) {
-    return data.candidates[0].content.parts[0].text.trim();
+    try {
+      const result = JSON.parse(data.candidates[0].content.parts[0].text.trim());
+      return {
+        translation: result.translation,
+        detectedLangCode: result.detectedLangCode
+      };
+    } catch (e) {
+      // Fallback if Gemini doesn't return valid JSON
+      return {
+        translation: data.candidates[0].content.parts[0].text.trim(),
+        detectedLangCode: ''
+      };
+    }
   }
   throw new Error('無法提取結果');
 }
 
 async function translateWithMyMemory(text, targetLangCode) {
-  // MyMemory API: https://mymemory.translated.net/doc/spec.php
-  // Free usage limit: 5000 chars/day without email/key.
-  // langpair: 'source|target' (e.g., 'en|it'). Use 'Autodetect|target' for auto-detection.
-  
   const url = new URL('https://api.mymemory.translated.net/get');
   url.searchParams.append('q', text);
   url.searchParams.append('langpair', `Autodetect|${targetLangCode}`);
 
   const response = await fetch(url);
-  
-  if (!response.ok) {
-    // MyMemory returns 403 or other codes when limit reached or error
-    throw new Error(`MyMemory 請求失敗 (${response.status})`);
-  }
+  if (!response.ok) throw new Error(`MyMemory 請求失敗 (${response.status})`);
   
   const data = await response.json();
-  
   if (data.responseStatus !== 200) {
-    // MyMemory puts error details in responseDetails even if HTTP status is 200 sometimes, 
-    // or if responseStatus is not 200.
-    // However, usually HTTP 200 comes with data. 
-    // If responseStatus is 403 (limit exceeded), it might still be a JSON body.
     throw new Error(data.responseDetails || 'MyMemory 翻譯錯誤');
   }
 
-  return data.responseData.translatedText;
+  return {
+    translation: data.responseData.translatedText,
+    detectedLangCode: data.responseData.detectedSourceLanguage
+  };
 }

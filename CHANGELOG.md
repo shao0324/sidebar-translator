@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-04-07
+
+### Added
+- **Detected Language Display:** The sidebar now shows the detected source language for all translation engines (Google, Gemini, and MyMemory).
+- **Improved Gemini Integration:** Updated the translation prompt to request JSON responses, ensuring more reliable source language detection.
+
 ## [1.4.0] - 2026-01-30
 
 ### Added
