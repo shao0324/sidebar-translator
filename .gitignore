@@ -1,0 +1,7 @@
+# Git Ignore File
+
+# AI Context
+.cobridge
+
+# Antigravity Rules
+.agents/rules/system.md
